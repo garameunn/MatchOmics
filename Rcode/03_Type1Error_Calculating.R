@@ -309,22 +309,6 @@ head(pvalues_comb)
 
 save(pvalues_comb, file=paste0("data/T1/NSAMP",nsamp,"_REP",rep,"_RATE",rate,"_",nonlin,"_",scenario,".RData")) 
 
-t1err <- apply(pvalues_comb[,1:23], 2, type1_1)
-rownames(t1err) <-c("p.001","p.005","p.01","p.05","p.1")
-t1err
-CIfun1<-function(pvals, level){ 
-  if(sum(is.na(pvals))>0) pvals[which(is.na(pvals))] <- 1
-  xx <-round((sum(pvals<level)/length(pvals))*5000,0)
-  testp <- prop.test(x=xx,n=5000,correct=T)
-  return(testp$conf.int)
-}
-conf.int <- do.call(rbind,lapply(c(0.001,0.005,0.01,0.05,0.1),function(y) apply(pvalues_comb[,1:22], 2, FUN=CIfun1, level=y))) # conf.int
-rownames(conf.int) <- paste0("CI_",c(rep(c("p.001","p.005","p.01","p.05","p.1"),each=2)))
-t1err1 <- rbind(t1err, conf.int)
-colnames(t1err1) <-  c("Unadjusted",wghtMnames)
-t1err1
-t1err2 <- t1err1
-t(t1err2)
 
 
 
