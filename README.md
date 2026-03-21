@@ -8,10 +8,8 @@ Install from GitHub:
 
 
 ## Example
-```r
-install.packages("remotes")
-remotes::install_github("garameunn/MatchOmics")
 
+```r
 library(MatchOmics)
 
 data("toy_marker")
