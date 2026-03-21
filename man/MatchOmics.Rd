@@ -23,35 +23,36 @@ MatchOmics(
 )
 }
 \arguments{
-\item{marker}{numeric vector. Target marker to test.}
+\item{marker}{Numeric vector. Target marker to test.}
 
-\item{outcome}{binary outcome vector (0/1).}
+\item{outcome}{Binary outcome vector coded as 0/1.}
 
-\item{omics_type}{one of "microbiome", "proteome", "metabolome", "transcriptome", "custom".}
+\item{omics_type}{One of "microbiome", "proteome", "metabolome",
+"transcriptome", or "custom".}
 
-\item{heterogeneity}{data.frame or matrix of heterogeneity covariates.}
+\item{heterogeneity}{Data frame or matrix of heterogeneity covariates.}
 
-\item{covariates}{optional data.frame of additional adjustment covariates.}
+\item{covariates}{Optional data frame of additional adjustment covariates.}
 
-\item{ids}{optional subject IDs.}
+\item{ids}{Optional subject IDs.}
 
-\item{dichotomize}{logical; if TRUE, dichotomize marker by median.}
+\item{dichotomize}{Logical; if TRUE, dichotomize marker by median.}
 
-\item{match_ratio}{integer; default 1 for 1:1 matching.}
+\item{match_ratio}{Integer; default 1 for 1:1 matching.}
 
-\item{replace}{logical; default TRUE.}
+\item{replace}{Logical; default TRUE.}
 
-\item{caliper}{numeric or NULL; default 0.2.}
+\item{caliper}{Numeric or NULL; default 0.2.}
 
-\item{distance}{distance method for MatchIt; default "glm".}
+\item{distance}{Distance method for MatchIt; default "glm".}
 
-\item{corstr}{working correlation for GEE; default "exchangeable".}
+\item{corstr}{Working correlation for GEE; default "exchangeable".}
 
-\item{sandwich}{logical; use sandwich SE; default TRUE.}
+\item{sandwich}{Logical; use sandwich SE; default TRUE.}
 
-\item{gee_family}{family for GEE; default binomial.}
+\item{gee_family}{Family for GEE; default binomial.}
 
-\item{return_matched}{logical; if TRUE, return matched data.}
+\item{return_matched}{Logical; if TRUE, return matched data.}
 }
 \value{
 A list with propensity score model, match object, matched data,
