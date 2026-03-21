@@ -14,22 +14,18 @@ remotes::install_github("garameunn/MatchOmics")
 
 library(MatchOmics)
 
-set.seed(1)
-
-n <- 200
-marker <- rnorm(n)
-outcome <- rbinom(n, 1, 0.3)
-
-omics_mat <- matrix(rexp(n * 50), nrow = n)
+data("toy_marker")
+data("toy_outcome")
+data("toy_omics")
 
 het <- prepare_heterogeneity(
   omics_type = "proteome",
-  data = omics_mat
+  data = toy_omics
 )
 
 fit <- MatchOmics(
-  marker = marker,
-  outcome = outcome,
+  marker = toy_marker,
+  outcome = toy_outcome,
   heterogeneity = het,
   replace = TRUE,
   caliper = 0.2,
