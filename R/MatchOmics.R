@@ -116,6 +116,11 @@ MatchOmics <- function(marker,
   )
   matched_df <- matched_df[order(as.integer(matched_df$cluster)), ]
 
+  # Append heterogeneity columns (needed for post-matching SMD diagnostics)
+  het_sub <- heterogeneity[match(rownames(matched_df), rownames(heterogeneity)), , drop = FALSE]
+  rownames(het_sub) <- rownames(matched_df)
+  matched_df <- cbind(matched_df, het_sub)
+
   # Mean-normalise weights (guarantees sum(w) = N for GEE)
   matched_df$weight <- matched_df$weight / mean(matched_df$weight)
 
