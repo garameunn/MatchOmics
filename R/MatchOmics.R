@@ -123,13 +123,17 @@ MatchOmics <- function(marker,
   neff_val <- compute_neff(matched_df$weight)
 
   # Weighted GEE
-  gee_fit <- geepack::geeglm(
-    outcome ~ marker_class,
-    data    = matched_df,
-    id      = cluster,
-    weights = weight,
-    family  = binomial(),
-    corstr  = corstr
+  # suppressWarnings: weighted binomial GEE always triggers "non-integer #successes"
+  # because weights shift the effective trial count off integers — results are unaffected.
+  gee_fit <- suppressWarnings(
+    geepack::geeglm(
+      outcome ~ marker_class,
+      data    = matched_df,
+      id      = cluster,
+      weights = weight,
+      family  = binomial(),
+      corstr  = corstr
+    )
   )
 
   coef_tbl <- as.data.frame(summary(gee_fit)$coefficients)
