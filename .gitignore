@@ -5,3 +5,8 @@
 *.Rproj
 inst/doc
 docs/
+
+# local dev/test scripts with machine-specific paths — not for distribution
+data-raw/build_docs.R
+data-raw/test_examples.R
+data-raw/test_installed.R

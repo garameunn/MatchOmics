@@ -67,11 +67,11 @@ standard_match <- function(data, formula, caliper) {
 # Union-find cluster builder (merges pairs from both rounds)
 build_clusters_from_pairs <- function(pairs_df) {
   if (is.null(pairs_df) || nrow(pairs_df) == 0)
-    return(setNames(integer(0), character(0)))
+    return(stats::setNames(integer(0), character(0)))
 
   edges  <- unique(pairs_df[, c("treated", "control")])
   nodes  <- unique(c(edges$treated, edges$control))
-  parent <- setNames(as.list(nodes), nodes)
+  parent <- stats::setNames(as.list(nodes), nodes)
 
   find_root <- function(x) {
     while (!identical(parent[[x]], x)) x <- parent[[x]]
@@ -85,7 +85,7 @@ build_clusters_from_pairs <- function(pairs_df) {
 
   roots   <- vapply(nodes, find_root, character(1))
   cluster <- as.integer(factor(roots))
-  setNames(cluster, nodes)
+  stats::setNames(cluster, nodes)
 }
 
 # Mean-normalised weights: w_j = m_j / mean(m)  →  sum(w) = N
@@ -96,5 +96,5 @@ build_weights <- function(all_ids, pairs_df) {
   m[is.na(m)] <- 0L
   active <- m[m > 0]
   w <- m / mean(active)
-  setNames(w, all_ids)
+  stats::setNames(w, all_ids)
 }

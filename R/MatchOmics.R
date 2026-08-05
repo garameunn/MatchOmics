@@ -12,8 +12,9 @@
 #' @param caliper  Numeric. Caliper width on the PS scale. \code{NULL} removes
 #'   the caliper. Default \code{0.3}.
 #' @param method   \code{"two_round"} (default) uses two-round rescue matching
-#'   (proposed method); \code{"standard"} uses single-round without-replacement
-#'   matching.
+#'   (proposed method; termed "with-replacement matching" in the manuscript,
+#'   since a control may be reused across rounds 1 and 2); \code{"standard"}
+#'   uses single-round without-replacement matching (round 1 only).
 #' @param corstr   GEE correlation structure passed to \code{geepack::geeglm}.
 #'   One of \code{"independence"} (default) or \code{"exchangeable"}.
 #'
@@ -71,14 +72,14 @@ MatchOmics <- function(marker,
   rownames(heterogeneity) <- rnames
 
   # Dichotomise marker at median
-  marker_class <- ifelse(marker >= median(marker, na.rm = TRUE), "up", "down")
+  marker_class <- ifelse(marker >= stats::median(marker, na.rm = TRUE), "up", "down")
   names(marker_class) <- rnames
 
   # Build PS model data
   ps_data   <- data.frame(marker_class = as.factor(marker_class),
                           heterogeneity,
                           row.names = rnames)
-  ps_form   <- as.formula(paste("marker_class ~",
+  ps_form   <- stats::as.formula(paste("marker_class ~",
                                 paste(names(heterogeneity), collapse = " + ")))
 
   # Match
@@ -136,7 +137,7 @@ MatchOmics <- function(marker,
       data    = matched_df,
       id      = cluster,
       weights = weight,
-      family  = binomial(),
+      family  = stats::binomial(),
       corstr  = corstr
     )
   )
@@ -160,3 +161,7 @@ MatchOmics <- function(marker,
     class = "MatchOmics"
   )
 }
+
+# These are resolved via NSE against a `data =` argument (geeglm(), aes())
+# at runtime — not undefined globals.
+utils::globalVariables(c("cluster", "weight", "smd", "covariate", "timing"))

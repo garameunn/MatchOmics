@@ -25,6 +25,11 @@ subjects without sacrificing PS-caliper quality.
 A standard single-round without-replacement matching is also available via
 `method = "standard"`.
 
+> **Terminology note**: the manuscript refers to `method = "two_round"` as
+> **with-replacement matching** (a control may be reused across rounds 1 and
+> 2) and to `method = "standard"` as **without-replacement matching**
+> (round 1 only). The mechanics are identical; only the name differs.
+
 ## Installation
 
 ```r
@@ -99,7 +104,7 @@ N = 200/500/1000) are in `inst/simulation/`. See
 ## Citation
 
 Kim, N.-E. et al. (2026). *MatchOmics: heterogeneity-aware propensity score
-matching for multi-omics association analysis.* (manuscript in preparation)
+matching for multi-omics association analysis.* (manuscript submitted)
 
 ## License
 

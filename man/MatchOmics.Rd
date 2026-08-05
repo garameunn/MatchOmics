@@ -26,8 +26,9 @@ covariates (e.g. output of \code{\link{compute_heterogeneity}}).}
 the caliper. Default \code{0.3}.}
 
 \item{method}{\code{"two_round"} (default) uses two-round rescue matching
-(proposed method); \code{"standard"} uses single-round without-replacement
-matching.}
+(proposed method; termed "with-replacement matching" in the manuscript,
+since a control may be reused across rounds 1 and 2); \code{"standard"}
+uses single-round without-replacement matching (round 1 only).}
 
 \item{corstr}{GEE correlation structure passed to \code{geepack::geeglm}.
 One of \code{"independence"} (default) or \code{"exchangeable"}.}

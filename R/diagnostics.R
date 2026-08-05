@@ -78,9 +78,9 @@ love_plot <- function(smd_df, title = "Love Plot", threshold = 0.1) {
                             levels = c("Before matching", "After matching"))
 
   ggplot2::ggplot(df_long,
-                  ggplot2::aes(x = .data$smd, y = .data$covariate,
-                               colour = .data$timing,
-                               shape  = .data$timing)) +
+                  ggplot2::aes(x = smd, y = covariate,
+                               colour = timing,
+                               shape  = timing)) +
     ggplot2::geom_point(size = 3) +
     ggplot2::geom_vline(xintercept = threshold,
                         linetype = "dashed", colour = "grey40") +
