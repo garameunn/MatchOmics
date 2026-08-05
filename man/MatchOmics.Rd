@@ -10,7 +10,9 @@ MatchOmics(
   heterogeneity,
   caliper = 0.3,
   method = c("two_round", "standard"),
-  corstr = c("independence", "exchangeable")
+  corstr = c("independence", "exchangeable"),
+  adjust_ps = TRUE,
+  outcome_covariates = NULL
 )
 }
 \arguments{
@@ -30,8 +32,18 @@ the caliper. Default \code{0.3}.}
 since a control may be reused across rounds 1 and 2); \code{"standard"}
 uses single-round without-replacement matching (round 1 only).}
 
-\item{corstr}{GEE correlation structure passed to \code{geepack::geeglm}.
+\item{corstr}{GEE correlation structure passed to \code{geeM::geem}.
 One of \code{"independence"} (default) or \code{"exchangeable"}.}
+
+\item{adjust_ps}{Logical. If \code{TRUE} (default), the propensity score
+is included as a covariate in the outcome GEE, matching the model used
+throughout the manuscript (\code{outcome ~ marker_class + ps}). Set to
+\code{FALSE} to fit \code{outcome ~ marker_class} only.}
+
+\item{outcome_covariates}{Optional data frame (n rows, one row per
+subject, same row order as \code{marker}/\code{outcome}) of additional
+nuisance covariates to include in the outcome GEE (e.g. age, sex, batch).
+\code{NULL} (default) adds none.}
 }
 \value{
 A \code{MatchOmics} object (list) with components:
@@ -39,7 +51,7 @@ A \code{MatchOmics} object (list) with components:
 \item{ps_model}{Fitted PS model (MatchIt object).}
 \item{match_result}{Raw output of the matching step.}
 \item{matched_data}{Data frame of matched subjects with weights.}
-\item{gee_fit}{Fitted \code{geeglm} object.}
+\item{gee_fit}{Fitted \code{geem} object.}
 \item{coef_table}{Coefficient table from GEE summary.}
 \item{neff}{Kish effective sample size after matching.}
 \item{n_input}{Number of input subjects.}

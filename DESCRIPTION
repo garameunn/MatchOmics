@@ -1,7 +1,7 @@
 Package: MatchOmics
 Type: Package
 Title: Propensity Score Matching Framework for Heterogeneity-Aware Omics Association Analysis
-Version: 0.2.0
+Version: 0.3.0
 Authors@R:
     person(given = "Nam-Eun",
            family = "Kim",
@@ -24,7 +24,7 @@ Depends:
 Imports:
     stats,
     MatchIt,
-    geepack
+    geeM
 Suggests:
     ggplot2,
     vegan,

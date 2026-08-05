@@ -15,15 +15,23 @@
 #'   (proposed method; termed "with-replacement matching" in the manuscript,
 #'   since a control may be reused across rounds 1 and 2); \code{"standard"}
 #'   uses single-round without-replacement matching (round 1 only).
-#' @param corstr   GEE correlation structure passed to \code{geepack::geeglm}.
+#' @param corstr   GEE correlation structure passed to \code{geeM::geem}.
 #'   One of \code{"independence"} (default) or \code{"exchangeable"}.
+#' @param adjust_ps  Logical. If \code{TRUE} (default), the propensity score
+#'   is included as a covariate in the outcome GEE, matching the model used
+#'   throughout the manuscript (\code{outcome ~ marker_class + ps}). Set to
+#'   \code{FALSE} to fit \code{outcome ~ marker_class} only.
+#' @param outcome_covariates  Optional data frame (n rows, one row per
+#'   subject, same row order as \code{marker}/\code{outcome}) of additional
+#'   nuisance covariates to include in the outcome GEE (e.g. age, sex, batch).
+#'   \code{NULL} (default) adds none.
 #'
 #' @return A \code{MatchOmics} object (list) with components:
 #'   \describe{
 #'     \item{ps_model}{Fitted PS model (MatchIt object).}
 #'     \item{match_result}{Raw output of the matching step.}
 #'     \item{matched_data}{Data frame of matched subjects with weights.}
-#'     \item{gee_fit}{Fitted \code{geeglm} object.}
+#'     \item{gee_fit}{Fitted \code{geem} object.}
 #'     \item{coef_table}{Coefficient table from GEE summary.}
 #'     \item{neff}{Kish effective sample size after matching.}
 #'     \item{n_input}{Number of input subjects.}
@@ -51,7 +59,9 @@ MatchOmics <- function(marker,
                        heterogeneity,
                        caliper  = 0.3,
                        method   = c("two_round", "standard"),
-                       corstr   = c("independence", "exchangeable")) {
+                       corstr   = c("independence", "exchangeable"),
+                       adjust_ps = TRUE,
+                       outcome_covariates = NULL) {
 
   method <- match.arg(method)
   corstr <- match.arg(corstr)
@@ -63,6 +73,9 @@ MatchOmics <- function(marker,
     stop("'heterogeneity' must be a data frame with one row per subject.")
   if (!all(outcome %in% c(0, 1, NA)))
     stop("'outcome' must be binary (0/1).")
+  if (!is.null(outcome_covariates) &&
+      (!is.data.frame(outcome_covariates) || nrow(outcome_covariates) != n))
+    stop("'outcome_covariates' must be a data frame with one row per subject.")
 
   # Assign integer rownames for consistent subsetting
   outcome <- as.integer(outcome)
@@ -70,6 +83,7 @@ MatchOmics <- function(marker,
   names(marker)  <- rnames
   names(outcome) <- rnames
   rownames(heterogeneity) <- rnames
+  if (!is.null(outcome_covariates)) rownames(outcome_covariates) <- rnames
 
   # Dichotomise marker at median
   marker_class <- ifelse(marker >= stats::median(marker, na.rm = TRUE), "up", "down")
@@ -122,27 +136,53 @@ MatchOmics <- function(marker,
   rownames(het_sub) <- rownames(matched_df)
   matched_df <- cbind(matched_df, het_sub)
 
+  # Append user-supplied outcome-model covariates
+  outcome_terms <- character(0)
+  if (!is.null(outcome_covariates)) {
+    cov_sub <- outcome_covariates[match(rownames(matched_df), rownames(outcome_covariates)), ,
+                                  drop = FALSE]
+    rownames(cov_sub) <- rownames(matched_df)
+    matched_df <- cbind(matched_df, cov_sub)
+    outcome_terms <- names(outcome_covariates)
+  }
+
   # Mean-normalise weights (guarantees sum(w) = N for GEE)
   matched_df$weight <- matched_df$weight / mean(matched_df$weight)
 
   # Effective sample size
   neff_val <- compute_neff(matched_df$weight)
 
-  # Weighted GEE
+  # Outcome model: marker_class [+ ps] [+ outcome_covariates], matching the
+  # model used throughout the manuscript (outcome ~ marker + PS + covariates)
+  rhs <- c("marker_class", if (adjust_ps) "ps", outcome_terms)
+  outcome_form <- stats::as.formula(paste("outcome ~", paste(rhs, collapse = " + ")))
+
+  # Weighted GEE (geeM::geem — matches the engine used in the manuscript
+  # simulation and real-data analysis scripts, unlike geepack::geeglm)
   # suppressWarnings: weighted binomial GEE always triggers "non-integer #successes"
   # because weights shift the effective trial count off integers — results are unaffected.
   gee_fit <- suppressWarnings(
-    geepack::geeglm(
-      outcome ~ marker_class,
-      data    = matched_df,
-      id      = cluster,
-      weights = weight,
-      family  = stats::binomial(),
-      corstr  = corstr
+    geeM::geem(
+      formula  = outcome_form,
+      data     = matched_df,
+      id       = matched_df$cluster,
+      weights  = matched_df$weight,
+      family   = stats::binomial(),
+      corstr   = corstr,
+      sandwich = TRUE,
+      useP     = TRUE
     )
   )
 
-  coef_tbl <- as.data.frame(summary(gee_fit)$coefficients)
+  gee_summary <- summary(gee_fit)
+  coef_tbl <- data.frame(
+    Estimate    = gee_summary$beta,
+    `Std.err`   = gee_summary$se.robust,
+    Wald        = gee_summary$wald.test,
+    `Pr(>|W|)`  = gee_summary$p,
+    row.names   = gee_summary$coefnames,
+    check.names = FALSE
+  )
 
   structure(
     list(
@@ -156,12 +196,13 @@ MatchOmics <- function(marker,
       n_matched    = nrow(matched_df),
       caliper      = caliper,
       method       = method,
-      corstr       = corstr
+      corstr       = corstr,
+      adjust_ps    = adjust_ps
     ),
     class = "MatchOmics"
   )
 }
 
-# These are resolved via NSE against a `data =` argument (geeglm(), aes())
+# 'smd'/'covariate'/'timing' are resolved via NSE against `data =` in aes()
 # at runtime — not undefined globals.
-utils::globalVariables(c("cluster", "weight", "smd", "covariate", "timing"))
+utils::globalVariables(c("smd", "covariate", "timing"))

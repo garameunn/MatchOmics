@@ -20,7 +20,9 @@ subjects without sacrificing PS-caliper quality.
 4. Build matched clusters across both rounds (union-find).
 5. Assign mean-normalised weights: `w = m / mean(m)`, ensuring `sum(w) = N`
    for GEE.
-6. Test marker–outcome association via weighted GEE.
+6. Test marker–outcome association via weighted GEE:
+   `outcome ~ marker_class + ps [+ outcome_covariates]` (propensity score
+   included by default via `adjust_ps = TRUE`, matching the manuscript).
 
 A standard single-round without-replacement matching is also available via
 `method = "standard"`.
@@ -51,6 +53,7 @@ data(toy_heterogeneity)   # 200 x 2 PCA-based heterogeneity
 het <- compute_heterogeneity(toy_omics, omics_type = "proteomics")
 
 # Test one marker — two-round matching (proposed method)
+# Outcome model defaults to marker_class + ps (adjust_ps = TRUE)
 fit <- MatchOmics(
   marker        = toy_omics[1, ],
   outcome       = toy_outcome,
@@ -63,6 +66,11 @@ fit <- MatchOmics(
 print(fit)
 summary(fit)
 coef(fit)
+
+# Add nuisance covariates (e.g. age, sex) to the outcome model, or drop
+# the propensity-score adjustment:
+# MatchOmics(..., outcome_covariates = data.frame(age = age_vec))
+# MatchOmics(..., adjust_ps = FALSE)
 ```
 
 ### Multi-marker loop
@@ -103,8 +111,8 @@ N = 200/500/1000) are in `inst/simulation/`. See
 
 ## Citation
 
-Kim, N.-E. et al. (2026). *MatchOmics: heterogeneity-aware propensity score
-matching for multi-omics association analysis.* (manuscript submitted)
+Kim, N.-E. et al. (2026). *MatchOmics: a propensity score matching framework
+for heterogeneity-robust multi-omics association analysis.* (manuscript submitted)
 
 ## License
 

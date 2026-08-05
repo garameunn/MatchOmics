@@ -6,6 +6,7 @@ print.MatchOmics <- function(x, ...) {
       else "(single-round without replacement)", "\n")
   cat("  Caliper  :", if (is.null(x$caliper)) "none" else x$caliper, "\n")
   cat("  Corstr   :", x$corstr, "\n")
+  cat("  PS-adj.  :", x$adjust_ps, "\n")
   cat("  N input  :", x$n_input, "\n")
   cat("  N matched:", x$n_matched, "\n")
   cat("  Neff     :", round(x$neff, 1), "\n")
@@ -25,7 +26,8 @@ summary.MatchOmics <- function(object, ...) {
       n_matched  = object$n_matched,
       method     = object$method,
       caliper    = object$caliper,
-      corstr     = object$corstr
+      corstr     = object$corstr,
+      adjust_ps  = object$adjust_ps
     ),
     class = "summary.MatchOmics"
   )
@@ -35,7 +37,7 @@ summary.MatchOmics <- function(object, ...) {
 print.summary.MatchOmics <- function(x, ...) {
   cat("MatchOmics summary\n")
   cat("  Method:", x$method, "| Caliper:", if (is.null(x$caliper)) "none" else x$caliper,
-      "| Corstr:", x$corstr, "\n")
+      "| Corstr:", x$corstr, "| PS-adj.:", x$adjust_ps, "\n")
   cat("  N matched:", x$n_matched, "| Neff:", round(x$neff, 1), "\n\n")
   cat("GEE coefficients:\n")
   print(x$coef_table)
@@ -46,5 +48,5 @@ print.summary.MatchOmics <- function(x, ...) {
 
 #' @export
 coef.MatchOmics <- function(object, ...) {
-  stats::coef(object$gee_fit)
+  stats::setNames(object$coef_table$Estimate, rownames(object$coef_table))
 }

@@ -37,6 +37,62 @@ test_that("MatchOmics runs with standard method", {
   expect_equal(fit$method, "standard")
 })
 
+test_that("adjust_ps = TRUE (default) includes ps in the outcome model", {
+  data(toy_omics, envir = environment())
+  data(toy_outcome, envir = environment())
+  data(toy_heterogeneity, envir = environment())
+
+  fit <- MatchOmics(
+    marker        = toy_omics[1, ],
+    outcome       = toy_outcome,
+    heterogeneity = toy_heterogeneity,
+    caliper       = 0.3,
+    corstr        = "independence"
+  )
+
+  expect_true(fit$adjust_ps)
+  expect_true("ps" %in% rownames(fit$coef_table))
+})
+
+test_that("adjust_ps = FALSE omits ps from the outcome model", {
+  data(toy_omics, envir = environment())
+  data(toy_outcome, envir = environment())
+  data(toy_heterogeneity, envir = environment())
+
+  fit <- MatchOmics(
+    marker        = toy_omics[1, ],
+    outcome       = toy_outcome,
+    heterogeneity = toy_heterogeneity,
+    caliper       = 0.3,
+    corstr        = "independence",
+    adjust_ps     = FALSE
+  )
+
+  expect_false(fit$adjust_ps)
+  expect_false("ps" %in% rownames(fit$coef_table))
+})
+
+test_that("outcome_covariates are added to the outcome model", {
+  data(toy_omics, envir = environment())
+  data(toy_outcome, envir = environment())
+  data(toy_heterogeneity, envir = environment())
+
+  set.seed(1)
+  extra <- data.frame(age = rnorm(length(toy_outcome)))
+
+  fit <- MatchOmics(
+    marker             = toy_omics[1, ],
+    outcome            = toy_outcome,
+    heterogeneity      = toy_heterogeneity,
+    caliper            = 0.3,
+    corstr             = "independence",
+    outcome_covariates = extra
+  )
+
+  expect_true("age" %in% rownames(fit$coef_table))
+  expect_true("age" %in% names(fit$matched_data))
+})
+
 test_that("compute_heterogeneity returns correct dimensions", {
   data(toy_omics, envir = environment())
   het <- compute_heterogeneity(toy_omics, omics_type = "proteomics")
