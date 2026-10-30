@@ -4,7 +4,13 @@
 \alias{compute_smd}
 \title{Standardised mean difference per covariate}
 \usage{
-compute_smd(df, covnames, group_col = "marker_class", treated_level = "up")
+compute_smd(
+  df,
+  covnames,
+  group_col = "marker_class",
+  treated_level = "up",
+  weight_col = NULL
+)
 }
 \arguments{
 \item{df}{Data frame containing the covariates and a binary grouping
@@ -17,6 +23,11 @@ column.}
 
 \item{treated_level}{Value that identifies the treated group (default
 \code{"up"}).}
+
+\item{weight_col}{Optional name of a weight column. If given (e.g.
+\code{"weight"} in \code{fit$matched_data}), group means and variances are
+weighted, as in the post-matching balance criterion of the manuscript.
+\code{NULL} (default) gives the unweighted SMD.}
 }
 \value{
 Named numeric vector of SMD values.

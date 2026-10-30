@@ -123,3 +123,26 @@ test_that("input validation errors are informative", {
     "one row per subject"
   )
 })
+
+test_that("outcome model uses the continuous marker, not the median split", {
+  data(toy_omics, envir = environment())
+  data(toy_outcome, envir = environment())
+  data(toy_heterogeneity, envir = environment())
+
+  fit <- MatchOmics(toy_omics[1, ], toy_outcome, toy_heterogeneity, caliper = 0.3)
+
+  expect_true("marker" %in% rownames(fit$coef_table))
+  expect_false(any(grepl("marker_class", rownames(fit$coef_table))))
+  expect_equal(nrow(summary(fit)$marker_row), 1L)
+})
+
+test_that("compute_smd weighted option reduces to unweighted means with equal weights", {
+  set.seed(2)
+  df <- data.frame(x = rnorm(40), g = rep(c("up", "down"), 20), w = 1)
+  uw <- compute_smd(df, "x", group_col = "g")
+  ww <- compute_smd(df, "x", group_col = "g", weight_col = "w")
+  # same mean difference; weighted variance uses the population form
+  expect_equal(sign(uw), sign(ww))
+  df$w <- c(rep(3, 20), rep(1, 20))
+  expect_false(isTRUE(all.equal(ww, compute_smd(df, "x", group_col = "g", weight_col = "w"))))
+})

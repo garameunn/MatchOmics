@@ -2,10 +2,12 @@
 #'
 #' Performs two-round (or standard single-round) nearest-neighbour propensity
 #' score matching on a dichotomised omics marker, then tests for association
-#' with the binary outcome via weighted GEE.
+#' with the binary outcome via weighted GEE. The dichotomisation only defines
+#' the groups to be matched; the outcome GEE uses the continuous marker.
 #'
 #' @param marker   Numeric vector of length n. A single omics feature (e.g. one
-#'   protein or metabolite). Dichotomised at its median internally.
+#'   protein or metabolite). Dichotomised at its median internally to define
+#'   the matching groups; entered as a continuous variable in the outcome GEE.
 #' @param outcome  Integer/numeric 0/1 vector of length n. Binary outcome.
 #' @param heterogeneity  Data frame (n rows). Heterogeneity indices used as PS
 #'   covariates (e.g. output of \code{\link{compute_heterogeneity}}).
@@ -19,8 +21,8 @@
 #'   One of \code{"independence"} (default) or \code{"exchangeable"}.
 #' @param adjust_ps  Logical. If \code{TRUE} (default), the propensity score
 #'   is included as a covariate in the outcome GEE, matching the model used
-#'   throughout the manuscript (\code{outcome ~ marker_class + ps}). Set to
-#'   \code{FALSE} to fit \code{outcome ~ marker_class} only.
+#'   throughout the manuscript (\code{outcome ~ marker + ps}). Set to
+#'   \code{FALSE} to fit \code{outcome ~ marker} only.
 #' @param outcome_covariates  Optional data frame (n rows, one row per
 #'   subject, same row order as \code{marker}/\code{outcome}) of additional
 #'   nuisance covariates to include in the outcome GEE (e.g. age, sex, batch).
@@ -152,9 +154,10 @@ MatchOmics <- function(marker,
   # Effective sample size
   neff_val <- compute_neff(matched_df$weight)
 
-  # Outcome model: marker_class [+ ps] [+ outcome_covariates], matching the
-  # model used throughout the manuscript (outcome ~ marker + PS + covariates)
-  rhs <- c("marker_class", if (adjust_ps) "ps", outcome_terms)
+  # Outcome model: continuous marker [+ ps] [+ outcome_covariates], matching
+  # the model used throughout the manuscript (outcome ~ marker + PS + covariates);
+  # marker_class only defines the matching groups
+  rhs <- c("marker", if (adjust_ps) "ps", outcome_terms)
   outcome_form <- stats::as.formula(paste("outcome ~", paste(rhs, collapse = " + ")))
 
   # Weighted GEE (geeM::geem — matches the engine used in the manuscript

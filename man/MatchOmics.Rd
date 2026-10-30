@@ -17,7 +17,8 @@ MatchOmics(
 }
 \arguments{
 \item{marker}{Numeric vector of length n. A single omics feature (e.g. one
-protein or metabolite). Dichotomised at its median internally.}
+protein or metabolite). Dichotomised at its median internally to define
+the matching groups; entered as a continuous variable in the outcome GEE.}
 
 \item{outcome}{Integer/numeric 0/1 vector of length n. Binary outcome.}
 
@@ -37,8 +38,8 @@ One of \code{"independence"} (default) or \code{"exchangeable"}.}
 
 \item{adjust_ps}{Logical. If \code{TRUE} (default), the propensity score
 is included as a covariate in the outcome GEE, matching the model used
-throughout the manuscript (\code{outcome ~ marker_class + ps}). Set to
-\code{FALSE} to fit \code{outcome ~ marker_class} only.}
+throughout the manuscript (\code{outcome ~ marker + ps}). Set to
+\code{FALSE} to fit \code{outcome ~ marker} only.}
 
 \item{outcome_covariates}{Optional data frame (n rows, one row per
 subject, same row order as \code{marker}/\code{outcome}) of additional
@@ -61,7 +62,8 @@ A \code{MatchOmics} object (list) with components:
 \description{
 Performs two-round (or standard single-round) nearest-neighbour propensity
 score matching on a dichotomised omics marker, then tests for association
-with the binary outcome via weighted GEE.
+with the binary outcome via weighted GEE. The dichotomisation only defines
+the groups to be matched; the outcome GEE uses the continuous marker.
 }
 \examples{
 data(toy_omics)

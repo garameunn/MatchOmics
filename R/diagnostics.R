@@ -18,18 +18,29 @@ compute_neff <- function(w) {
 #'   \code{"marker_class"}).
 #' @param treated_level Value that identifies the treated group (default
 #'   \code{"up"}).
+#' @param weight_col Optional name of a weight column. If given (e.g.
+#'   \code{"weight"} in \code{fit$matched_data}), group means and variances are
+#'   weighted, as in the post-matching balance criterion of the manuscript.
+#'   \code{NULL} (default) gives the unweighted SMD.
 #' @return Named numeric vector of SMD values.
 #' @export
 compute_smd <- function(df, covnames,
                         group_col     = "marker_class",
-                        treated_level = "up") {
+                        treated_level = "up",
+                        weight_col    = NULL) {
+  w_all <- if (is.null(weight_col)) rep(1, nrow(df)) else df[[weight_col]]
+  wmean <- function(x, w) sum(w * x, na.rm = TRUE) / sum(w[!is.na(x)])
+  wvar  <- function(x, w) {
+    if (is.null(weight_col)) return(stats::var(x, na.rm = TRUE))
+    m <- wmean(x, w); sum(w * (x - m)^2, na.rm = TRUE) / sum(w[!is.na(x)])
+  }
   sapply(covnames, function(v) {
     x  <- df[[v]]
     g  <- df[[group_col]] == treated_level
-    m1 <- mean(x[g],  na.rm = TRUE)
-    m0 <- mean(x[!g], na.rm = TRUE)
-    s1 <- stats::var(x[g],  na.rm = TRUE)
-    s0 <- stats::var(x[!g], na.rm = TRUE)
+    m1 <- wmean(x[g],  w_all[g])
+    m0 <- wmean(x[!g], w_all[!g])
+    s1 <- wvar(x[g],  w_all[g])
+    s0 <- wvar(x[!g], w_all[!g])
     pooled_sd <- sqrt((s1 + s0) / 2)
     if (pooled_sd == 0) return(NA_real_)
     (m1 - m0) / pooled_sd

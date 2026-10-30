@@ -1,3 +1,16 @@
+# MatchOmics 0.3.1
+
+* The outcome GEE now uses the continuous marker (`outcome ~ marker + ps`),
+  as described in the manuscript and used in its simulation and real-data
+  analyses. The median split (`marker_class`) only defines the groups to be
+  matched. Previously the dichotomised marker entered the outcome model, so
+  marker coefficients from 0.3.0 are on a different scale (up vs down) and
+  are not comparable with 0.3.1 (per unit of the marker).
+* `compute_smd()` gains a `weight_col` argument for the weighted
+  standardised mean difference (e.g. `weight_col = "weight"` on
+  `fit$matched_data`), matching the post-matching balance criterion of the
+  manuscript. The default remains unweighted.
+
 # MatchOmics 0.3.0
 
 Breaking changes to the default outcome model, to align the package with

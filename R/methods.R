@@ -16,7 +16,7 @@ print.MatchOmics <- function(x, ...) {
 #' @export
 summary.MatchOmics <- function(object, ...) {
   ct <- object$coef_table
-  marker_row <- ct[grep("marker_class", rownames(ct), fixed = TRUE), , drop = FALSE]
+  marker_row <- ct[rownames(ct) == "marker", , drop = FALSE]
 
   structure(
     list(
@@ -41,7 +41,7 @@ print.summary.MatchOmics <- function(x, ...) {
   cat("  N matched:", x$n_matched, "| Neff:", round(x$neff, 1), "\n\n")
   cat("GEE coefficients:\n")
   print(x$coef_table)
-  cat("\nMarker effect (marker_class):\n")
+  cat("\nMarker effect (log-odds ratio per unit of the marker):\n")
   print(x$marker_row)
   invisible(x)
 }

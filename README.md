@@ -21,8 +21,10 @@ subjects without sacrificing PS-caliper quality.
 5. Assign mean-normalised weights: `w = m / mean(m)`, ensuring `sum(w) = N`
    for GEE.
 6. Test marker–outcome association via weighted GEE:
-   `outcome ~ marker_class + ps [+ outcome_covariates]` (propensity score
-   included by default via `adjust_ps = TRUE`, matching the manuscript).
+   `outcome ~ marker + ps [+ outcome_covariates]`. The marker enters as a
+   continuous variable; the median split only defines the matching groups.
+   The propensity score is included by default (`adjust_ps = TRUE`), matching
+   the manuscript.
 
 A standard single-round without-replacement matching is also available via
 `method = "standard"`.
@@ -53,7 +55,7 @@ data(toy_heterogeneity)   # 200 x 2 PCA-based heterogeneity
 het <- compute_heterogeneity(toy_omics, omics_type = "proteomics")
 
 # Test one marker — two-round matching (proposed method)
-# Outcome model defaults to marker_class + ps (adjust_ps = TRUE)
+# Outcome model defaults to marker + ps (adjust_ps = TRUE), marker continuous
 fit <- MatchOmics(
   marker        = toy_omics[1, ],
   outcome       = toy_outcome,
@@ -94,7 +96,7 @@ pre_smd  <- compute_smd(
   data.frame(toy_heterogeneity, marker_class = ifelse(toy_omics[1,] >= median(toy_omics[1,]), "up","down")),
   covnames = c("het1","het2")
 )
-post_smd <- compute_smd(mdata, covnames = c("het1","het2"))
+post_smd <- compute_smd(mdata, covnames = c("het1","het2"), weight_col = "weight")
 
 sdf <- smd_summary(pre_smd, post_smd)
 love_plot(sdf)
