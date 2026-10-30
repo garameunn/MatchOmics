@@ -43,7 +43,7 @@ the final specification is selected in `revC_final.R`. Set the environment varia
 
 `16_make_figures_tables_v3.R` (Figures 1, 3, Supplementary Figures 2-3, Tables 2-5),
 `20b_fig2_matchomics_pair.R` (Figure 2 and Supplementary Figure 4),
-`18_renumber_stables_citation_order.R`, `19_stable11_excluded_markers.R` and `20_fig2_S1S2.R`
+`18_renumber_stables_citation_order.R`, `19_stable11_excluded_markers.R`, `20_fig2_S1S2.R` and `21_stable_readable_headers.R`
 (Supplementary Tables 1-14). Run from the project root after the summaries above.
 
 ## Software
